@@ -6,7 +6,9 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useI18n } from '@/i18n/useI18n';
 import { useTranslations } from '@/i18n/useTranslations';
+import { insertWaitlist } from '@/lib/supabase';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,9 +64,11 @@ const inputBlurStyle = (el: HTMLElement, hasError = false) => {
 
 export default function CTASection() {
   const t = useTranslations('cta_section');
+  const { locale } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -92,12 +96,28 @@ export default function CTASection() {
     });
   }, { scope: sectionRef });
 
-  const onSubmit = async (_data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
-    // TODO: connect to a backend / Supabase when ready
-    await new Promise(r => setTimeout(r, 800));
-    setSubmitted(true);
-    setLoading(false);
+    setSubmitError(null);
+    try {
+      await insertWaitlist({
+        artist_name: data.artistName,
+        email: data.email,
+        instagram: data.instagram?.trim() || undefined,
+        tiktok: data.tiktok?.trim() || undefined,
+        genre: data.genre,
+        locale,
+      });
+      setSubmitted(true);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'DUPLICATE_EMAIL') {
+        setSubmitError(t('form_error_duplicate'));
+      } else {
+        setSubmitError(t('form_error_generic'));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -363,6 +383,17 @@ export default function CTASection() {
                 </>
               )}
             </button>
+
+            {submitError && (
+              <p style={{
+                textAlign: 'center', fontSize: '0.82rem', color: 'var(--accent-red)',
+                fontFamily: 'var(--font-mono)', lineHeight: 1.5, marginTop: '4px',
+                padding: '10px', background: 'rgba(255,77,77,0.08)',
+                borderRadius: '8px', border: '1px solid rgba(255,77,77,0.2)',
+              }}>
+                {submitError}
+              </p>
+            )}
 
             <p style={{
               textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-secondary)',

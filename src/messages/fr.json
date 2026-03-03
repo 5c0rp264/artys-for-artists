@@ -134,7 +134,9 @@
     "form_success_body": "On te contacte avant tout le monde au lancement. On va aussi te follow sur tes réseaux — à très vite dans l'écosystème Artys ✦",
     "form_consent": "En t'inscrivant, tu acceptes de recevoir les actualités Artys. Zéro spam, désinscription en 1 clic.",
     "field_instagram_placeholder": "toncompte Instagram (sans le @)",
-    "field_tiktok_placeholder": "toncompte TikTok (sans le @)"
+    "field_tiktok_placeholder": "toncompte TikTok (sans le @)",
+    "form_error_duplicate": "Cet email est déjà inscrit sur la waitlist !",
+    "form_error_generic": "Une erreur est survenue, réessaie dans quelques instants."
   },
   "footer": {
     "tagline": "La première plateforme de streaming équitable où artistes et fans co-créent et co-gagnent — gouvernée par ses membres.",
