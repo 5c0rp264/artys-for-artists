@@ -125,15 +125,16 @@
     "field_artist_placeholder": "Ex : Aylan K., DJ Pharaoh, Luna…",
     "field_email_label": "Ton email",
     "field_email_placeholder": "ton@email.com",
-    "field_social_label": "Ton Instagram ou TikTok",
+    "field_social_label": "Tes réseaux sociaux",
     "field_social_badge": "On va te follow !",
-    "field_social_placeholder": "toncompte (sans le @)",
     "field_genre_label": "Ton genre musical",
     "field_genre_placeholder": "— Sélectionne ton genre —",
     "form_submit": "Rejoins la liste d'attente",
     "form_success_title": "Tu es dans la place !",
     "form_success_body": "On te contacte avant tout le monde au lancement. On va aussi te follow sur tes réseaux — à très vite dans l'écosystème Artys ✦",
-    "form_consent": "En t'inscrivant, tu acceptes de recevoir les actualités Artys. Zéro spam, désinscription en 1 clic."
+    "form_consent": "En t'inscrivant, tu acceptes de recevoir les actualités Artys. Zéro spam, désinscription en 1 clic.",
+    "field_instagram_placeholder": "toncompte Instagram (sans le @)",
+    "field_tiktok_placeholder": "toncompte TikTok (sans le @)"
   },
   "footer": {
     "tagline": "La première plateforme de streaming équitable où artistes et fans co-créent et co-gagnent — gouvernée par ses membres.",
