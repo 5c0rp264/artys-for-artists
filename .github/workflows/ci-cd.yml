@@ -1,0 +1,155 @@
+name: CI/CD - Lint, Build & FTP Deploy
+
+on:
+  pull_request:
+    branches: [ "main", "dev" ]
+  push:
+    branches: [ "main", "dev" ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+  build:
+    name: Build
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 3
+
+  deploy:
+    name: Deploy to FTP (main branch)
+    if: github.ref == 'refs/heads/main'
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: ./dist/
+
+      - name: Build deployment SMS message
+        id: build_sms
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "message=ARTYS DEPLOYED: $(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_OUTPUT"
+
+      - name: Send deployment SMS
+        if: ${{ success() }}
+        env:
+          FREE_MOBILE_USER: ${{ secrets.FREE_MOBILE_USER }}
+          FREE_MOBILE_PASS: ${{ secrets.FREE_MOBILE_PASS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FREE_MOBILE_USER" ] || [ -z "$FREE_MOBILE_PASS" ]; then
+            echo "SMS credentials not configured, skipping notification"
+            exit 0
+          fi
+          curl --silent --show-error --get \
+            --data-urlencode "user=$FREE_MOBILE_USER" \
+            --data-urlencode "pass=$FREE_MOBILE_PASS" \
+            --data-urlencode "msg=${{ steps.build_sms.outputs.message }}" \
+            https://smsapi.free-mobile.fr/sendmsg
+
+      - name: Send deployment failure SMS
+        if: ${{ failure() }}
+        env:
+          FREE_MOBILE_USER: ${{ secrets.FREE_MOBILE_USER }}
+          FREE_MOBILE_PASS: ${{ secrets.FREE_MOBILE_PASS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FREE_MOBILE_USER" ] || [ -z "$FREE_MOBILE_PASS" ]; then
+            echo "SMS credentials not configured, skipping notification"
+            exit 0
+          fi
+          MESSAGE="⚠️ERROR⚠️ ARTYS DEPLOY FAILED on main branch! Check GitHub Actions: https://github.com/5c0rp264/artys-for-artists/actions"
+          curl --silent --show-error --get \
+            --data-urlencode "user=$FREE_MOBILE_USER" \
+            --data-urlencode "pass=$FREE_MOBILE_PASS" \
+            --data-urlencode "msg=$MESSAGE" \
+            https://smsapi.free-mobile.fr/sendmsg
+
+  notify-failure:
+    name: Notify on lint/build failure
+    if: ${{ always() && github.ref == 'refs/heads/main' && (needs.lint.result == 'failure' || needs.build.result == 'failure') }}
+    needs: [lint, build]
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Send failure SMS
+        env:
+          FREE_MOBILE_USER: ${{ secrets.FREE_MOBILE_USER }}
+          FREE_MOBILE_PASS: ${{ secrets.FREE_MOBILE_PASS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FREE_MOBILE_USER" ] || [ -z "$FREE_MOBILE_PASS" ]; then
+            echo "SMS credentials not configured, skipping notification"
+            exit 0
+          fi
+          MESSAGE="⚠️ERROR⚠️ ARTYS CI FAILED on main branch! Check GitHub Actions: https://github.com/5c0rp264/artys-for-artists/actions"
+          curl --silent --show-error --get \
+            --data-urlencode "user=$FREE_MOBILE_USER" \
+            --data-urlencode "pass=$FREE_MOBILE_PASS" \
+            --data-urlencode "msg=$MESSAGE" \
+            https://smsapi.free-mobile.fr/sendmsg

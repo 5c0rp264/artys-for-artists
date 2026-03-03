@@ -1,138 +1,102 @@
 # Artys Music — Homepage
 
-## 🎯 Vue d'ensemble
+## Overview
 
-Homepage de la première plateforme de streaming équitable. Reproduit fidèlement le design HTML source avec la stack technique Next.js 15, GSAP, Lenis et next-intl.
+Landing page for the first fair streaming platform. Built with React 19, Vite, GSAP, Lenis smooth scroll, and a custom lightweight i18n system (FR/EN/ES). Produces a static HTML/JS/CSS build — no backend required.
 
-## 🌐 URLs
+## URLs
 
-- **Dev Preview**: https://3000-iavfnjcp6funppdkdh8no-a402f90a.sandbox.novita.ai/fr
-- **FR**: `/fr` | **EN**: `/en` | **ES**: `/es`
-- **API Waitlist**: `POST /api/waitlist`
+- **FR**: default | **EN**: switch via lang selector | **ES**: switch via lang selector
 
-## ✅ Fonctionnalités implémentées
+## Tech Stack
 
-### Design System Artys
-- **Fonts** : Jost (Futura fallback) — BLACK (900) pour titres, EXTRA BOLD (800) sous-titres, Inter pour corps
-- **Couleurs** : `#000000` bg · `#00e5b0` accent vert · `#D9D9D9` secondaire · `#ff4d4d` urgence
-- **Bordures** : `#1f1f1f` · Cards : `#111111`
+| Tool | Version | Role |
+|------|---------|------|
+| React | 19 | UI framework |
+| Vite | 6.x | Build tool & dev server |
+| Tailwind CSS | v4 | Utility styling |
+| GSAP + ScrollTrigger | 3.x | Premium animations |
+| @gsap/react | latest | useGSAP hook |
+| Lenis | latest | Smooth scroll |
+| React Hook Form | 7.x | Waitlist form |
+| Zod | 3.x | Validation |
 
-### Animations & Effets
-- ✅ **Grain texture** SVG animé (overlay cinématographique)
-- ✅ **Cursor glow** vert suivant la souris
-- ✅ **Smooth scroll** Lenis premium
-- ✅ **Word Split Hero** (H1 GSAP stagger 0.08s)
-- ✅ **Text reveal au scroll** (gris → blanc progressif GSAP)
-- ✅ **Count-up Stats** (ScrollTrigger, easing power2.out)
-- ✅ **Fade-in sections** (GSAP ScrollTrigger)
-- ✅ **Urgence pulse** (section CTA, animation fond)
-- ✅ **Ring rotation** (Gouvernance, 40s linear)
-- ✅ **Mock phone** (perspective 3D, slide-in)
-
-### Sections (7)
-1. **Hero** — H1 split word, kicker badge, waveform, stats bar
-2. **Problème** — Cards rouge, bloc IA, texte muted
-3. **Comparaison** — Table full responsive, callout cards count-up
-4. **Backstage Guilds** — Features + Mock UI (missions, revenus)
-5. **Gouvernance** — Federation ring, college nodes, membership cards
-6. **CTA** — Formulaire email, pulse background urgence
-7. **Footer** — 4 colonnes, socials, liens légaux
-
-### Internationalisation
-- ✅ **FR / EN / ES** — 100% traduit (messages/*.json)
-- ✅ **next-intl** avec routing `/[locale]`
-- ✅ **LangSwitcher** discret top-right nav
-- ✅ **Détection automatique** via Accept-Language
-
-### Formulaire & API
-- ✅ **React Hook Form** + Zod validation
-- ✅ **API route** `POST /api/waitlist`
-- ⏳ **Supabase** (à brancher — structure prête)
-- ⏳ **Resend** (à brancher — structure prête)
-
-## 🏗️ Architecture
+## Architecture
 
 ```
 artys-for-artists/
-├── app/
-│   ├── [locale]/
-│   │   ├── layout.tsx       # Layout SSR par locale (Jost + Inter)
-│   │   └── page.tsx         # Page principale
-│   ├── api/waitlist/        # API capture emails
-│   ├── globals.css          # Design system complet
-│   └── layout.tsx           # Root layout
-├── components/
-│   ├── effects/
-│   │   ├── CursorGlow.tsx   # Cursor glow vert
-│   │   └── SmoothScroll.tsx # Lenis smooth scroll
-│   ├── sections/
-│   │   ├── Navbar.tsx       # Nav fixe + mobile
-│   │   ├── HeroSection.tsx  # Hero complet
-│   │   ├── ProblemSection.tsx
-│   │   ├── ComparisonSection.tsx
-│   │   ├── BackstageSection.tsx
-│   │   ├── GovernanceSection.tsx
-│   │   ├── CTASection.tsx
-│   │   └── Footer.tsx
-│   └── ui/
-│       ├── StatCard.tsx     # Chiffre + count-up
-│       ├── NarrativeBlock.tsx # Text reveal GSAP
-│       └── LangSwitcher.tsx
-├── i18n/
-│   ├── request.ts
-│   └── routing.ts
-├── messages/
-│   ├── fr.json
-│   ├── en.json
-│   └── es.json
-└── proxy.ts                 # next-intl routing
+├── src/
+│   ├── main.tsx                # Entry point
+│   ├── App.tsx                 # App shell with providers
+│   ├── globals.css             # Design system
+│   ├── vite-env.d.ts           # Vite type declarations
+│   ├── i18n/
+│   │   ├── I18nProvider.tsx    # React context i18n
+│   │   └── useTranslations.ts  # Drop-in useTranslations hook
+│   ├── messages/
+│   │   ├── fr.json
+│   │   ├── en.json
+│   │   └── es.json
+│   └── components/
+│       ├── effects/
+│       │   ├── CursorGlow.tsx
+│       │   └── SmoothScroll.tsx
+│       ├── sections/
+│       │   ├── Navbar.tsx
+│       │   ├── HeroSection.tsx
+│       │   ├── ProblemSection.tsx
+│       │   ├── ComparisonSection.tsx
+│       │   ├── BackstageSection.tsx
+│       │   ├── GovernanceSection.tsx
+│       │   ├── CTASection.tsx
+│       │   └── Footer.tsx
+│       └── ui/
+│           ├── StatCard.tsx
+│           ├── NarrativeBlock.tsx
+│           └── LangSwitcher.tsx
+├── public/                     # Static assets (logos, GIF)
+├── index.html                  # Vite entry HTML
+├── vite.config.ts
+├── tsconfig.json
+├── postcss.config.mjs
+└── .github/workflows/ci-cd.yml
 ```
 
-## 🚀 Stack Technique
-
-| Outil | Version | Rôle |
-|-------|---------|------|
-| Next.js | 16.x | SSR/SSG, App Router, React 19 |
-| Tailwind CSS | v4 | Styling utilitaire |
-| GSAP + ScrollTrigger | 3.x | Animations premium |
-| @gsap/react | latest | Hook useGSAP |
-| Lenis | latest | Smooth scroll |
-| next-intl | latest | i18n FR/EN/ES |
-| React Hook Form | 7.x | Formulaire email |
-| Zod | 3.x | Validation |
-
-## 📊 Data & Stockage
-
-- **Waitlist emails** → API route (prête pour Supabase)
-- **Aucune donnée persistée** en local — tout est statique
-
-## 🧑‍💻 Guide développeur
+## Development
 
 ```bash
-# Développement
-npm run dev          # Vite dev server port 3000
+npm install
+npm run dev          # Vite dev server on port 5173
 
-# Production build
-npm run build
-npm start
+npm run build        # Type-check + production build → dist/
+npm run preview      # Preview production build locally
 
-# PM2 (sandbox)
-pm2 start ecosystem.config.cjs
-pm2 logs artys --nostream
+npm run lint         # ESLint
+npm run typecheck    # TypeScript check
 ```
 
-## 🎨 Prochaines étapes recommandées
+## CI/CD
 
-1. **Brancher Supabase** — table `waitlist(id, email, locale, created_at)`
-2. **Brancher Resend** — email de confirmation à l'inscription
-3. **Déployer sur Vercel** — `vercel deploy`
-4. **OG Images** — `@vercel/og` par locale
-5. **Analytics** — Vercel Analytics ou Plausible
-6. **A/B testing** — 2 variants du Hero
+GitHub Actions pipeline (`.github/workflows/ci-cd.yml`):
 
-## 📅 Statut
+1. **lint** — ESLint + TypeScript type-check
+2. **build** — `npm run build` produces `dist/`
+3. **deploy** — FTP deploys `dist/` to production server (main branch only, FTPS)
+4. **notify** — SMS notifications via Free Mobile API on success/failure
 
-- **Build** : ✅ Zéro erreur, zéro warning
-- **Routes i18n** : ✅ 200 OK sur FR/EN/ES
-- **Console JS** : ✅ Propre
-- **Dernière mise à jour** : Mars 2026
+### Required Secrets
+
+| Secret | Description |
+|--------|-------------|
+| `FTP_SERVER` | FTP host |
+| `FTP_USERNAME` | FTP user |
+| `FTP_PASSWORD` | FTP password |
+| `FTP_SERVER_DIR` | Target directory on server |
+| `FREE_MOBILE_USER` | Free Mobile SMS API user (optional) |
+| `FREE_MOBILE_PASS` | Free Mobile SMS API password (optional) |
+
+GitHub environment: `dev`
+
+## i18n
+
+Locale detection: `navigator.language` → `localStorage` persistence. No URL-based routing — language switch is instant via React state. Supported: FR (default), EN, ES.
