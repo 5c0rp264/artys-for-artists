@@ -2,73 +2,59 @@ name: CI/CD - Lint, Build & FTP Deploy
 
 on:
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [main, dev]
   push:
-    branches: [ "main", "dev" ]
+    branches: [main, dev]
 
 permissions:
   contents: read
 
 jobs:
-  lint:
-    name: Lint & type-check
+  quality:
+    name: Typecheck & Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type-check
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
 
   build:
     name: Build
-    needs: [lint]
+    needs: [quality]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run build
 
-      - name: Build
-        run: npm run build
-
-      - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
+          include-hidden-files: true
           retention-days: 3
 
   deploy:
-    name: Deploy to FTP (main branch)
-    if: github.ref == 'refs/heads/main'
+    name: Deploy to FTP
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [build]
     runs-on: ubuntu-latest
-    environment:
-      name: dev
+    environment: production
     steps:
-      - name: Download dist artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
@@ -84,57 +70,40 @@ jobs:
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           local-dir: ./dist/
 
-      - name: Build deployment SMS message
-        id: build_sms
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "message=ARTYS DEPLOYED: $(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_OUTPUT"
-
       - name: Send deployment SMS
-        if: ${{ success() }}
+        if: always()
         env:
           FREE_MOBILE_USER: ${{ secrets.FREE_MOBILE_USER }}
           FREE_MOBILE_PASS: ${{ secrets.FREE_MOBILE_PASS }}
+          DEPLOY_STATUS: ${{ job.status }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "$FREE_MOBILE_USER" ] || [ -z "$FREE_MOBILE_PASS" ]; then
-            echo "SMS credentials not configured, skipping notification"
+          if [ -z "${FREE_MOBILE_USER:-}" ] || [ -z "${FREE_MOBILE_PASS:-}" ]; then
+            echo "SMS credentials not configured — skipping"
             exit 0
           fi
-          curl --silent --show-error --get \
-            --data-urlencode "user=$FREE_MOBILE_USER" \
-            --data-urlencode "pass=$FREE_MOBILE_PASS" \
-            --data-urlencode "msg=${{ steps.build_sms.outputs.message }}" \
-            https://smsapi.free-mobile.fr/sendmsg
-
-      - name: Send deployment failure SMS
-        if: ${{ failure() }}
-        env:
-          FREE_MOBILE_USER: ${{ secrets.FREE_MOBILE_USER }}
-          FREE_MOBILE_PASS: ${{ secrets.FREE_MOBILE_PASS }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "$FREE_MOBILE_USER" ] || [ -z "$FREE_MOBILE_PASS" ]; then
-            echo "SMS credentials not configured, skipping notification"
-            exit 0
+          if [ "$DEPLOY_STATUS" = "success" ]; then
+            MSG="ARTYS DEPLOYED: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          else
+            MSG="ARTYS DEPLOY FAILED — https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
-          MESSAGE="⚠️ERROR⚠️ ARTYS DEPLOY FAILED on main branch! Check GitHub Actions: https://github.com/5c0rp264/artys-for-artists/actions"
-          curl --silent --show-error --get \
+          curl -fsS --get \
             --data-urlencode "user=$FREE_MOBILE_USER" \
             --data-urlencode "pass=$FREE_MOBILE_PASS" \
-            --data-urlencode "msg=$MESSAGE" \
+            --data-urlencode "msg=$MSG" \
             https://smsapi.free-mobile.fr/sendmsg
 
-  notify-failure:
-    name: Notify on lint/build failure
-    if: ${{ always() && github.ref == 'refs/heads/main' && (needs.lint.result == 'failure' || needs.build.result == 'failure') }}
-    needs: [lint, build]
+  notify-ci-failure:
+    name: Notify CI failure
+    if: >-
+      always()
+      && github.event_name == 'push'
+      && github.ref == 'refs/heads/main'
+      && (needs.quality.result == 'failure' || needs.build.result == 'failure')
+    needs: [quality, build]
     runs-on: ubuntu-latest
-    environment:
-      name: dev
+    environment: production
     steps:
       - name: Send failure SMS
         env:
@@ -143,13 +112,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "$FREE_MOBILE_USER" ] || [ -z "$FREE_MOBILE_PASS" ]; then
-            echo "SMS credentials not configured, skipping notification"
+          if [ -z "${FREE_MOBILE_USER:-}" ] || [ -z "${FREE_MOBILE_PASS:-}" ]; then
+            echo "SMS credentials not configured — skipping"
             exit 0
           fi
-          MESSAGE="⚠️ERROR⚠️ ARTYS CI FAILED on main branch! Check GitHub Actions: https://github.com/5c0rp264/artys-for-artists/actions"
-          curl --silent --show-error --get \
+          curl -fsS --get \
             --data-urlencode "user=$FREE_MOBILE_USER" \
             --data-urlencode "pass=$FREE_MOBILE_PASS" \
-            --data-urlencode "msg=$MESSAGE" \
+            --data-urlencode "msg=ARTYS CI FAILED on main — https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             https://smsapi.free-mobile.fr/sendmsg
