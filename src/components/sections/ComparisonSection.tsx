@@ -91,30 +91,6 @@ export default function ComparisonSection() {
       hybrid: '~3 000 $/mois',
       artys: <span style={{ color: 'var(--accent)', fontWeight: 900, fontSize: '1.2rem', fontFamily: 'var(--font-title)' }}>6 000 $/mois</span>,
     },
-    {
-      metric: t('row5_metric'),
-      streaming: '—',
-      hybrid: '≈ 1 000 streams/fan/mois',
-      artys: '≈ 2 000 streams/fan/mois',
-    },
-    {
-      metric: t('row6_metric'),
-      streaming: <span style={{ color: 'var(--accent-red)' }}>❌ Algorithmique</span>,
-      hybrid: '✅ Mensuelle',
-      artys: '✅ Mensuelle garantie',
-    },
-    {
-      metric: t('row7_metric'),
-      streaming: <span style={{ color: 'var(--accent-red)' }}>Oui, totalement</span>,
-      hybrid: 'Partiellement',
-      artys: <span style={{ color: 'var(--accent)' }}>Non, jamais</span>,
-    },
-    {
-      metric: t('row8_metric'),
-      streaming: 'Indirecte',
-      hybrid: 'Directe',
-      artys: 'Directe + exclusive',
-    },
   ];
 
   return (
