@@ -1,0 +1,411 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ─── DESIGN TOKENS ARTYS ─── */
+:root {
+  --bg:           #000000;
+  --bg2:          #0a0a0a;
+  --surface:      #111111;
+  --surface2:     #161616;
+  --accent:       #00e5b0;
+  --accent-glow:  rgba(0, 229, 176, 0.15);
+  --accent-border:rgba(0, 229, 176, 0.25);
+  --accent-red:   #ff4d4d;
+  --accent-yellow:#ffe066;
+  --text:         #ffffff;
+  --text-secondary:#9ca3af;
+  --text-dim:     #D9D9D9;
+  --border:       #1f1f1f;
+  --border-light: rgba(255,255,255,0.06);
+  --secondary:    #D9D9D9;
+
+  /* Font families */
+  --font-title:   'Jost', 'Futura', 'Century Gothic', sans-serif;
+  --font-body:    'Inter', 'Jost', sans-serif;
+  --font-mono:    'DM Mono', 'Courier New', monospace;
+}
+
+/* ─── RESET & BASE ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* ─── GRAIN TEXTURE OVERLAY (cinématographique) ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.35;
+  animation: grain 8s steps(10) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10%  { transform: translate(-2%, -3%); }
+  20%  { transform: translate(3%, 2%); }
+  30%  { transform: translate(-1%, 4%); }
+  40%  { transform: translate(4%, -1%); }
+  50%  { transform: translate(-3%, 3%); }
+  60%  { transform: translate(2%, -4%); }
+  70%  { transform: translate(-4%, 1%); }
+  80%  { transform: translate(1%, -2%); }
+  90%  { transform: translate(-2%, 4%); }
+}
+
+/* ─── CURSOR GLOW ─── */
+.cursor-glow {
+  pointer-events: none;
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 229, 176, 0.06) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  z-index: 9998;
+  transition: opacity 0.3s;
+  will-change: transform;
+}
+
+/* ─── TYPOGRAPHY ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+/* Futura BLACK = weight 800 */
+h1 {
+  font-weight: 800;
+  font-size: clamp(1.8rem, 5.5vw, 4.2rem);
+  letter-spacing: -0.04em;
+  line-height: 1.18;
+  text-transform: uppercase;
+}
+
+/* Futura EXTRA BOLD = weight 800 pour sous-titres */
+h2 {
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 3.2rem);
+  line-height: 1.08;
+}
+
+h3 {
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+}
+
+h4 {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0em;
+}
+
+/* ─── HIGHLIGHT COLORS ─── */
+.highlight       { color: var(--accent); }
+.highlight-red   { color: var(--accent-red); }
+.highlight-yellow{ color: var(--accent-yellow); }
+
+/* ─── CONTAINER ─── */
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 5vw, 32px);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── RESPONSIVE HELPERS ─── */
+/* Boutons pleine largeur sur mobile */
+@media (max-width: 480px) {
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .hero-ctas {
+    flex-direction: column;
+  }
+}
+
+/* ─── TAG / BADGE ─── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0, 229, 176, 0.08);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+  font-weight: 500;
+}
+.tag::before { content: '●'; font-size: 0.5rem; }
+
+/* ─── SECTION DIVIDER ─── */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* ─── BUTTONS ─── */
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 16px 32px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 40px rgba(0, 229, 176, 0.25);
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 60px rgba(0, 229, 176, 0.45);
+}
+
+.btn-secondary {
+  color: var(--text);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 16px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s, background 0.2s;
+  background: transparent;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── WAVEFORM ─── */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 32px;
+}
+.wave-bar {
+  width: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+  opacity: 0.5;
+  animation: wave 1.4s ease-in-out infinite;
+}
+@keyframes wave {
+  0%, 100% { height: 6px; opacity: 0.3; }
+  50%       { height: 28px; opacity: 0.8; }
+}
+.wave-bar:nth-child(1) { animation-delay: 0s; }
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.6s; }
+.wave-bar:nth-child(6) { animation-delay: 0.75s; }
+.wave-bar:nth-child(7) { animation-delay: 0.6s; }
+.wave-bar:nth-child(8) { animation-delay: 0.45s; }
+.wave-bar:nth-child(9) { animation-delay: 0.3s; }
+
+/* ─── HERO ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 40px rgba(0, 229, 176, 0.25); }
+  50%      { box-shadow: 0 0 80px rgba(0, 229, 176, 0.5); }
+}
+
+@keyframes rotate-slow {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ─── URGENCE PULSE ─── */
+@keyframes urgence-pulse {
+  0%, 100% { background-color: #000000; }
+  50%      { background-color: #0a0000; }
+}
+
+.urgence-bg {
+  animation: urgence-pulse 4s ease-in-out infinite;
+}
+
+/* ─── SCROLL TEXT REVEAL (GSAP cibles) ─── */
+.reveal-word {
+  display: inline-block;
+  color: #4b5563; /* couleur initiale sombre pour l'effet reveal → blanc */
+  transition: color 0.1s;
+}
+.reveal-word.lit {
+  color: var(--text);
+}
+
+/* ─── NARRATIVE BLOCK ─── */
+.narrative-text {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-family: var(--font-title);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+
+/* ─── COMPARISON TABLE ─── */
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+}
+.comparison-table th {
+  padding: 20px 28px;
+  text-align: left;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.comparison-table th.col-featured {
+  background: rgba(0, 229, 176, 0.06);
+  border-left: 1px solid var(--accent-border);
+  border-right: 1px solid var(--accent-border);
+  color: var(--accent);
+  border-radius: 12px 12px 0 0;
+}
+.comparison-table td {
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.comparison-table td.col-featured {
+  background: rgba(0, 229, 176, 0.04);
+  border-left: 1px solid rgba(0, 229, 176, 0.1);
+  border-right: 1px solid rgba(0, 229, 176, 0.1);
+  color: var(--text);
+}
+.comparison-table tr:last-child td.col-featured {
+  border-radius: 0 0 12px 12px;
+}
+.comparison-table td.metric-col {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+.val-big {
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+}
+.val-big.green  { color: var(--accent); }
+.val-big.yellow { color: var(--accent-yellow); }
+.val-big.red    { color: var(--accent-red); }
+
+.badge-best {
+  display: inline-block;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-weight: 700;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ─── MOCK UI ─── */
+.mock-stat-num {
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.mock-stat-label {
+  font-family: var(--font-title);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ─── RING ANIMATION ─── */
+.ring-outer {
+  animation: rotate-slow 40s linear infinite;
+  transform-origin: center;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* ─── FADE-IN (fallback sans GSAP) ─── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
