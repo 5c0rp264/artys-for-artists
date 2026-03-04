@@ -6,7 +6,9 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useI18n } from '@/i18n/useI18n';
 import { useTranslations } from '@/i18n/useTranslations';
+import { insertWaitlist } from '@/lib/supabase';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,9 +25,13 @@ const MUSIC_GENRES = [
 const schema = z.object({
   artistName: z.string().min(1, 'Ton nom d\'artiste est requis').max(60),
   email: z.string().email('Email invalide'),
-  social: z.string().min(1, 'Ajoute ton Instagram ou TikTok').max(100),
+  instagram: z.string().max(100).optional(),
+  tiktok: z.string().max(100).optional(),
   genre: z.string().min(1, 'Choisis ton genre musical'),
-});
+}).refine(
+  (data) => (data.instagram && data.instagram.trim() !== '') || (data.tiktok && data.tiktok.trim() !== ''),
+  { message: 'Ajoute au moins un compte Instagram ou TikTok', path: ['instagram'] }
+);
 
 type FormData = z.infer<typeof schema>;
 
@@ -58,15 +64,21 @@ const inputBlurStyle = (el: HTMLElement, hasError = false) => {
 
 export default function CTASection() {
   const t = useTranslations('cta_section');
+  const { locale } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const instagramVal = watch('instagram');
+  const tiktokVal = watch('tiktok');
 
   useGSAP(() => {
     const items = sectionRef.current?.querySelectorAll('.cta-anim');
@@ -84,12 +96,28 @@ export default function CTASection() {
     });
   }, { scope: sectionRef });
 
-  const onSubmit = async (_data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
-    // TODO: connect to a backend / Supabase when ready
-    await new Promise(r => setTimeout(r, 800));
-    setSubmitted(true);
-    setLoading(false);
+    setSubmitError(null);
+    try {
+      await insertWaitlist({
+        artist_name: data.artistName,
+        email: data.email,
+        instagram: data.instagram?.trim() || undefined,
+        tiktok: data.tiktok?.trim() || undefined,
+        genre: data.genre,
+        locale,
+      });
+      setSubmitted(true);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'DUPLICATE_EMAIL') {
+        setSubmitError(t('form_error_duplicate'));
+      } else {
+        setSubmitError(t('form_error_generic'));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -207,6 +235,7 @@ export default function CTASection() {
               )}
             </div>
 
+            {/* Instagram + TikTok */}
             <div>
               <label style={{
                 display: 'block', fontSize: '0.75rem', fontFamily: 'var(--font-title)',
@@ -221,25 +250,56 @@ export default function CTASection() {
                   {t('field_social_badge')}
                 </span>
               </label>
-              <div style={{ position: 'relative' }}>
+
+              {/* Instagram */}
+              <div style={{ position: 'relative', marginBottom: '10px' }}>
                 <span style={{
-                  position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)',
-                  color: 'var(--text-secondary)', fontSize: '1rem', pointerEvents: 'none', userSelect: 'none',
+                  position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
+                  pointerEvents: 'none', userSelect: 'none', display: 'flex', alignItems: 'center', gap: '4px',
                 }}>
-                  @
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    style={{ color: (!instagramVal || instagramVal.trim() === '') ? 'var(--text-secondary)' : '#E1306C' }}>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                  </svg>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>@</span>
                 </span>
                 <input
-                  {...register('social')}
+                  {...register('instagram')}
                   type="text"
-                  placeholder={t('field_social_placeholder')}
-                  style={{ ...inputBase, paddingLeft: '36px', borderColor: errors.social ? 'var(--accent-red)' : 'var(--border)' }}
+                  placeholder={t('field_instagram_placeholder')}
+                  style={{ ...inputBase, paddingLeft: '52px', borderColor: errors.instagram ? 'var(--accent-red)' : 'var(--border)' }}
                   onFocus={e => inputFocusStyle(e.target)}
-                  onBlur={e => inputBlurStyle(e.target, !!errors.social)}
+                  onBlur={e => inputBlurStyle(e.target, !!errors.instagram)}
                 />
               </div>
-              {errors.social && (
-                <p style={{ color: 'var(--accent-red)', fontSize: '0.75rem', marginTop: '5px', fontFamily: 'var(--font-mono)' }}>
-                  {errors.social.message}
+
+              {/* TikTok */}
+              <div style={{ position: 'relative' }}>
+                <span style={{
+                  position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
+                  pointerEvents: 'none', userSelect: 'none', display: 'flex', alignItems: 'center', gap: '4px',
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                    style={{ color: (!tiktokVal || tiktokVal.trim() === '') ? 'var(--text-secondary)' : '#69C9D0' }}>
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/>
+                  </svg>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>@</span>
+                </span>
+                <input
+                  {...register('tiktok')}
+                  type="text"
+                  placeholder={t('field_tiktok_placeholder')}
+                  style={{ ...inputBase, paddingLeft: '52px', borderColor: 'var(--border)' }}
+                  onFocus={e => inputFocusStyle(e.target)}
+                  onBlur={e => inputBlurStyle(e.target, false)}
+                />
+              </div>
+
+              {errors.instagram && (
+                <p style={{ color: 'var(--accent-red)', fontSize: '0.75rem', marginTop: '6px', fontFamily: 'var(--font-mono)' }}>
+                  {errors.instagram.message}
                 </p>
               )}
             </div>
@@ -323,6 +383,17 @@ export default function CTASection() {
                 </>
               )}
             </button>
+
+            {submitError && (
+              <p style={{
+                textAlign: 'center', fontSize: '0.82rem', color: 'var(--accent-red)',
+                fontFamily: 'var(--font-mono)', lineHeight: 1.5, marginTop: '4px',
+                padding: '10px', background: 'rgba(255,77,77,0.08)',
+                borderRadius: '8px', border: '1px solid rgba(255,77,77,0.2)',
+              }}>
+                {submitError}
+              </p>
+            )}
 
             <p style={{
               textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-secondary)',

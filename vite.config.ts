@@ -4,10 +4,13 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  base: '/',
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+  },
+  preview: {
+    allowedHosts: 'all',
   },
 });

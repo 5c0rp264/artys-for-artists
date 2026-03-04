@@ -11,13 +11,12 @@ type Messages = I18nContextValue['messages'];
 const messagesByLocale: Record<Locale, Messages> = { fr, en, es };
 
 function detectLocale(): Locale {
-  const stored = localStorage.getItem('artys-locale') as Locale | null;
-  if (stored && LOCALES.includes(stored)) return stored;
-
+  // Navigateur en premier → localStorage uniquement si l'user a choisi manuellement
   const browserLang = navigator.language.split('-')[0] as Locale;
-  if (LOCALES.includes(browserLang)) return browserLang;
+  const defaultFromBrowser = LOCALES.includes(browserLang) ? browserLang : 'fr';
 
-  return 'fr';
+  const stored = localStorage.getItem('artys-locale') as Locale | null;
+  return (stored && LOCALES.includes(stored)) ? stored : defaultFromBrowser;
 }
 
 export default function I18nProvider({ children }: { children: ReactNode }) {
