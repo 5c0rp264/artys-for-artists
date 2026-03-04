@@ -10,7 +10,4 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
-  preview: {
-    allowedHosts: 'all',
-  },
 });
