@@ -21,11 +21,7 @@
     "stat1_body": "Le streaming n'a jamais payé les artistes et paiera de moins en moins. Il est temps de changer de modèle et de passer au Direct To Fans.",
     "stat2_number": "1 000 Superfans",
     "stat2_subtitle": "Théorie des 1 000 fans",
-    "stat2_body": "Il te faut 1 Million de streams/mois pour gagner 3 000 $/mois. Avec les Royaltips, il te faut 500 Superfans pour percevoir 3 000 $/mois, sans être streamé une seule fois !",
-    "stat3_number": "",
-    "stat3_label": "",
-    "stat4_number": "",
-    "stat4_label": ""
+    "stat2_body": "Il te faut 1 Million de streams/mois pour gagner 3 000 $/mois. Avec les Royaltips, il te faut 500 Superfans pour percevoir 3 000 $/mois, sans être streamé une seule fois !"
   },
   "problem": {
     "tag": "Le problème",
@@ -129,15 +125,18 @@
     "field_artist_placeholder": "Ex : Aylan K., DJ Pharaoh, Luna…",
     "field_email_label": "Ton email",
     "field_email_placeholder": "ton@email.com",
-    "field_social_label": "Ton Instagram ou TikTok",
+    "field_social_label": "Tes réseaux sociaux",
     "field_social_badge": "On va te follow !",
-    "field_social_placeholder": "toncompte (sans le @)",
     "field_genre_label": "Ton genre musical",
     "field_genre_placeholder": "— Sélectionne ton genre —",
     "form_submit": "Rejoins la liste d'attente",
     "form_success_title": "Tu es dans la place !",
     "form_success_body": "On te contacte avant tout le monde au lancement. On va aussi te follow sur tes réseaux — à très vite dans l'écosystème Artys ✦",
-    "form_consent": "En t'inscrivant, tu acceptes de recevoir les actualités Artys. Zéro spam, désinscription en 1 clic."
+    "form_consent": "En t'inscrivant, tu acceptes de recevoir les actualités Artys. Zéro spam, désinscription en 1 clic.",
+    "field_instagram_placeholder": "toncompte Instagram (sans le @)",
+    "field_tiktok_placeholder": "toncompte TikTok (sans le @)",
+    "form_error_duplicate": "Cet email est déjà inscrit sur la waitlist !",
+    "form_error_generic": "Une erreur est survenue, réessaie dans quelques instants."
   },
   "footer": {
     "tagline": "La première plateforme de streaming équitable où artistes et fans co-créent et co-gagnent — gouvernée par ses membres.",
