@@ -1,13 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Variables VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY manquantes dans .env.local');
+let supabase: SupabaseClient | null = null;
+if (supabaseUrl && supabaseAnonKey) {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const isSupabaseConfigured = !!supabase;
 
 export type WaitlistInsert = {
   artist_name: string;
@@ -19,6 +20,11 @@ export type WaitlistInsert = {
 };
 
 export async function insertWaitlist(data: WaitlistInsert): Promise<void> {
+  if (!supabase) {
+    console.warn('[Waitlist] Supabase not configured — skipping insert');
+    return;
+  }
+
   const { error } = await supabase.from('waitlist').insert({
     artist_name: data.artist_name,
     email: data.email.toLowerCase().trim(),
@@ -29,7 +35,6 @@ export async function insertWaitlist(data: WaitlistInsert): Promise<void> {
   });
 
   if (error) {
-    // Violation unique = email déjà inscrit
     if (error.code === '23505') throw new Error('DUPLICATE_EMAIL');
     throw new Error(error.message);
   }
