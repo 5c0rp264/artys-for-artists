@@ -79,15 +79,28 @@ export default function BackstageSection() {
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
-              {features.map((feat) => (
+              {features.map((feat, idx) => (
                 <div key={feat.key} className="bs-anim" style={{ display: 'flex', gap: '18px', alignItems: 'flex-start', opacity: 0 }}>
                   <div style={{
-                    width: '44px', height: '44px', borderRadius: '10px',
-                    background: 'rgba(0,229,176,0.08)', border: '1px solid var(--accent-border)',
+                    width: '44px', height: '44px', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.1rem', flexShrink: 0,
+                    flexShrink: 0, position: 'relative',
                   }}>
-                    {feat.icon}
+                    {/* Halo externe qui pulse */}
+                    <span className={`bs-pulse-ring bs-pulse-ring-${idx}`} style={{
+                      position: 'absolute', inset: 0,
+                      borderRadius: '50%',
+                      border: '2px solid rgba(0,229,176,0.5)',
+                      animation: `bsPulse 2.4s ease-out infinite`,
+                      animationDelay: `${idx * 0.4}s`,
+                    }} />
+                    {/* Point central */}
+                    <span style={{
+                      width: '14px', height: '14px', borderRadius: '50%',
+                      background: 'radial-gradient(circle, #00e5b0 0%, #00b890 100%)',
+                      boxShadow: '0 0 10px rgba(0,229,176,0.8), 0 0 24px rgba(0,229,176,0.4)',
+                      display: 'block',
+                    }} />
                   </div>
                   <div>
                     <h4 style={{
@@ -235,6 +248,11 @@ export default function BackstageSection() {
       </div>
 
       <style>{`
+        @keyframes bsPulse {
+          0%   { transform: scale(0.8); opacity: 0.9; }
+          60%  { transform: scale(1.9); opacity: 0.15; }
+          100% { transform: scale(2.4); opacity: 0; }
+        }
         .backstage-grid {
           display: grid;
           grid-template-columns: 1fr;
