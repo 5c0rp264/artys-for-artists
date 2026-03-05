@@ -80,11 +80,16 @@ function IPhoneMockup() {
           <div style={{ textAlign: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{
               width: '48px', height: '48px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #00e5b0, #00b890)',
-              margin: '0 auto 0.4rem', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '1.3rem',
-              boxShadow: '0 0 20px rgba(0,229,176,0.4)',
-            }}>🎤</div>
+              margin: '0 auto 0.4rem', overflow: 'hidden',
+              boxShadow: '0 0 20px rgba(0,229,176,0.4), 0 0 0 2px rgba(0,229,176,0.35)',
+              flexShrink: 0,
+            }}>
+              <img
+                src="https://i.imgur.com/LNd1qcF.png"
+                alt="Malcom"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
             <div style={{
               fontSize: '0.95rem', fontWeight: 800,
               background: 'linear-gradient(135deg, #00e5b0, #00b890)',
