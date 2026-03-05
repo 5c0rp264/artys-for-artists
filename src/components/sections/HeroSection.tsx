@@ -221,6 +221,37 @@ export default function HeroSection() {
       { opacity: 0, y: 30, scale: 0.92 },
       { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power3.out', delay: 1.1 }
     );
+
+    // Animation scroll-triggered sur les stat cards
+    gsap.fromTo('.hero-stat-item',
+      { opacity: 0, y: 50, scale: 0.96 },
+      {
+        opacity: 1, y: 0, scale: 1,
+        duration: 0.7,
+        stagger: 0.18,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.hero-stats-grid',
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    // Glow pulse sur les chiffres clés
+    gsap.to('.hero-stat-number', {
+      textShadow: '0 0 20px rgba(0,229,176,0.6)',
+      duration: 0.6,
+      delay: 0.4,
+      stagger: 0.18,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.hero-stats-grid',
+        start: 'top 88%',
+        toggleActions: 'play none none none',
+      }
+    });
+
   }, { scope: containerRef });
 
   const titleWords1 = t('title_1').split(' ');
@@ -434,16 +465,18 @@ export default function HeroSection() {
               body: t('stat2_body'),
             },
           ].map((stat, i) => (
-            <div key={i} className="hero-stat-item">
-              <div style={{
-                fontFamily: 'var(--font-title)',
-                fontWeight: 900,
-                fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                letterSpacing: '-0.03em',
-                color: 'var(--accent)',
-                lineHeight: 1.1,
-                marginBottom: '6px',
-              }}>
+            <div key={i} className="hero-stat-item" style={{ opacity: 0 }}>
+              <div
+                className="hero-stat-number"
+                style={{
+                  fontFamily: 'var(--font-title)',
+                  fontWeight: 900,
+                  fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+                  letterSpacing: '-0.03em',
+                  color: 'var(--accent)',
+                  lineHeight: 1.1,
+                  marginBottom: '6px',
+                }}>
                 {stat.number}
               </div>
               <div style={{
@@ -523,10 +556,19 @@ export default function HeroSection() {
           background: var(--surface);
           border: 1px solid var(--border);
           border-radius: 16px;
-          transition: border-color 0.25s;
+          transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+          cursor: default;
         }
         .hero-stat-item:hover {
-          border-color: rgba(0,229,176,0.25);
+          border-color: rgba(0,229,176,0.4);
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(0,229,176,0.1);
+        }
+        .hero-stat-item:hover .hero-stat-number {
+          text-shadow: 0 0 24px rgba(0,229,176,0.5);
+        }
+        .hero-stat-number {
+          transition: text-shadow 0.3s;
         }
         @media (max-width: 480px) {
           .hero-stats-grid {
