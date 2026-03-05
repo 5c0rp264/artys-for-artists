@@ -2,7 +2,7 @@
 
 ## Overview
 
-Landing page for the first fair streaming platform. Built with React 19, Vite, GSAP, Lenis smooth scroll, and a custom lightweight i18n system (FR/EN/ES). Produces a static HTML/JS/CSS build — no backend required.
+Landing page for the first fair streaming platform. Built with React 19, Vite, GSAP, Lenis smooth scroll, and a custom lightweight i18n system (FR/EN/ES). Waitlist form powered by Supabase. Produces a static HTML/JS/CSS build.
 
 ## URLs
 
@@ -20,6 +20,7 @@ Landing page for the first fair streaming platform. Built with React 19, Vite, G
 | Lenis | latest | Smooth scroll |
 | React Hook Form | 7.x | Waitlist form |
 | Zod | 3.x | Validation |
+| Supabase JS | 2.x | Waitlist backend (optional) |
 
 ## Architecture
 
@@ -30,6 +31,8 @@ artys-for-artists/
 │   ├── App.tsx                 # App shell with providers
 │   ├── globals.css             # Design system
 │   ├── vite-env.d.ts           # Vite type declarations
+│   ├── lib/
+│   │   └── supabase.ts         # Supabase client & waitlist insert
 │   ├── i18n/
 │   │   ├── I18nProvider.tsx    # React context i18n
 │   │   └── useTranslations.ts  # Drop-in useTranslations hook
@@ -66,6 +69,8 @@ artys-for-artists/
 
 ```bash
 npm install
+cp .env.local.example .env.local   # then fill in Supabase credentials
+npm install
 npm run dev          # Vite dev server on port 5173
 
 npm run build        # Type-check + production build → dist/
@@ -74,6 +79,8 @@ npm run preview      # Preview production build locally
 npm run lint         # ESLint
 npm run typecheck    # TypeScript check
 ```
+
+> **Note:** The app builds and runs without Supabase credentials — the waitlist form will simply succeed silently without persisting data.
 
 ## CI/CD
 
@@ -92,6 +99,8 @@ GitHub Actions pipeline (`.github/workflows/ci-cd.yml`):
 | `FTP_USERNAME` | FTP user |
 | `FTP_PASSWORD` | FTP password |
 | `FTP_SERVER_DIR` | Target directory on server |
+| `VITE_SUPABASE_URL` | Supabase project URL (optional — build works without) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key (optional) |
 | `FREE_MOBILE_USER` | Free Mobile SMS API user (optional) |
 | `FREE_MOBILE_PASS` | Free Mobile SMS API password (optional) |
 
