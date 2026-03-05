@@ -1,8 +1,163 @@
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTranslations } from '@/i18n/useTranslations';
+
+/* ─── Mockup iPhone animé ─────────────────────────────────────── */
+function IPhoneMockup() {
+  const [fans, setFans] = useState(870);
+  const [flash, setFlash] = useState<'fans' | 'royaltips' | null>(null);
+  const [addedFans, setAddedFans] = useState(12);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const added = Math.floor(Math.random() * 4) + 1;
+      setFans(f => f + added);
+      setAddedFans(added);
+      setFlash('fans');
+      setTimeout(() => setFlash('royaltips'), 300);
+      setTimeout(() => setFlash(null), 900);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const royaltips = fans * 6;
+  const fmt = (n: number) => n.toLocaleString('fr-FR');
+
+  return (
+    <div style={{
+      width: 'clamp(220px, 28vw, 300px)',
+      height: 'clamp(448px, 57vw, 612px)',
+      background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+      borderRadius: '55px',
+      padding: '10px',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1), inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 60px rgba(0,229,176,0.08)',
+      position: 'relative',
+      flexShrink: 0,
+    }}>
+      {/* Notch */}
+      <div style={{
+        position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)',
+        width: '90px', height: '26px', background: '#000',
+        borderRadius: '0 0 18px 18px', zIndex: 10,
+      }} />
+
+      {/* Écran */}
+      <div style={{
+        width: '100%', height: '100%', background: '#000',
+        borderRadius: '46px', overflow: 'hidden', position: 'relative',
+      }}>
+        <div style={{
+          padding: 'clamp(28px, 4vw, 36px) clamp(14px, 2vw, 18px) 16px',
+          height: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        }}>
+
+          {/* Header artiste */}
+          <div style={{ textAlign: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{
+              width: '48px', height: '48px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #00e5b0, #00b890)',
+              margin: '0 auto 0.4rem', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '1.3rem',
+              boxShadow: '0 0 20px rgba(0,229,176,0.4)',
+            }}>🎤</div>
+            <div style={{
+              fontSize: '0.95rem', fontWeight: 800,
+              background: 'linear-gradient(135deg, #00e5b0, #00b890)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>Malcom</div>
+            <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.5)' }}>Artiste Artys</div>
+          </div>
+
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+            {[
+              { id: 'fans', val: fmt(fans), label: 'FANS' },
+              { id: 'royaltips', val: fmt(royaltips) + '€', label: 'ROYALTIPS/MOIS' },
+            ].map(({ id, val, label }) => (
+              <div key={id} style={{
+                background: flash === id ? 'rgba(0,229,176,0.12)' : '#1a1a1a',
+                borderRadius: '10px', padding: '0.55rem',
+                textAlign: 'center', position: 'relative', overflow: 'hidden',
+                border: `1px solid ${flash === id ? 'rgba(0,229,176,0.3)' : 'transparent'}`,
+                transition: 'background 0.3s, border-color 0.3s',
+              }}>
+                <div style={{
+                  fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', fontWeight: 900,
+                  color: '#00e5b0', fontFamily: 'monospace', whiteSpace: 'nowrap',
+                  transition: 'transform 0.2s',
+                  transform: flash === id ? 'scale(1.08)' : 'scale(1)',
+                }}>{val}</div>
+                <div style={{ fontSize: '0.52rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Calcul Royaltips */}
+          <div style={{
+            background: 'rgba(0,229,176,0.05)', border: '1px solid rgba(0,229,176,0.2)',
+            borderRadius: '8px', padding: '0.5rem', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '0.62rem', color: '#00e5b0', fontWeight: 600 }}>6€ par fan et par mois</div>
+            <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.5)', marginTop: '2px', whiteSpace: 'nowrap' }}>
+              {fmt(fans)} × 6€ = <span style={{ color: '#00e5b0', fontWeight: 700 }}>{fmt(royaltips)}€</span>
+            </div>
+          </div>
+
+          {/* Mini chart */}
+          <div style={{
+            height: '52px', background: 'linear-gradient(135deg, rgba(0,229,176,0.1), rgba(0,229,176,0.03))',
+            borderRadius: '8px', display: 'flex', alignItems: 'flex-end',
+            padding: '8px 10px 6px', gap: '3px',
+          }}>
+            {[40, 55, 45, 65, 58, 70, 62, 80, 75, 88].map((h, i) => (
+              <div key={i} style={{
+                flex: 1, background: i === 9 ? '#00e5b0' : `rgba(0,229,176,${0.2 + i * 0.06})`,
+                borderRadius: '3px 3px 0 0', height: `${h}%`,
+                transition: 'height 0.4s ease',
+              }} />
+            ))}
+          </div>
+
+          {/* Activité récente */}
+          <div style={{ background: '#1a1a1a', borderRadius: '10px', padding: '0.6rem' }}>
+            <div style={{ fontSize: '0.58rem', color: '#00e5b0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
+              Activité récente
+            </div>
+            {[
+              { icon: '➕', text: `+${addedFans} fans aujourd'hui` },
+              { icon: '💰', text: `+${fmt(addedFans * 6)}€ Royaltips` },
+              { icon: '🎵', text: '37 streams' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.58rem', color: 'rgba(255,255,255,0.65)', marginBottom: i < 2 ? '0.2rem' : 0 }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(0,229,176,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', flexShrink: 0 }}>
+                  {item.icon}
+                </div>
+                {item.text}
+              </div>
+            ))}
+          </div>
+
+          {/* CTA button */}
+          <button style={{
+            background: 'linear-gradient(135deg, #00e5b0, #00b890)',
+            color: '#000', border: 'none', borderRadius: '10px',
+            padding: '0.5rem', fontWeight: 700, fontSize: '0.62rem',
+            cursor: 'pointer', width: '100%', marginTop: 'auto',
+            boxShadow: '0 4px 16px rgba(0,229,176,0.3)',
+          }}>
+            Voir les analytics complets
+          </button>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function HeroSection() {
   const t = useTranslations('hero');
@@ -40,9 +195,9 @@ export default function HeroSection() {
       });
     }
 
-    gsap.fromTo('.hero-gif',
-      { opacity: 0, y: 30, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'power3.out', delay: 1.1 }
+    gsap.fromTo('.hero-mockup',
+      { opacity: 0, y: 30, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power3.out', delay: 1.1 }
     );
   }, { scope: containerRef });
 
@@ -205,13 +360,9 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <img
-            className="hero-gif"
-            src="/artys-anim.gif"
-            alt="Artys animation"
-            width={220}
-            height={220}
-          />
+          <div className="hero-mockup" style={{ opacity: 0 }}>
+            <IPhoneMockup />
+          </div>
 
           </div>
 
@@ -313,28 +464,19 @@ export default function HeroSection() {
           gap: clamp(24px, 4vw, 48px);
           margin-bottom: clamp(16px, 2.5vh, 28px);
         }
-        .hero-gif {
+        .hero-mockup {
           flex-shrink: 0;
-          width: clamp(300px, 36vw, 520px);
-          height: clamp(300px, 36vw, 520px);
-          object-fit: contain;
-          opacity: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         @media (max-width: 640px) {
           .hero-title-row {
             flex-direction: column;
             align-items: flex-start;
           }
-          .hero-gif {
-            width: clamp(180px, 65vw, 320px);
-            height: clamp(180px, 65vw, 320px);
+          .hero-mockup {
             align-self: center;
-          }
-        }
-        @media (max-width: 360px) {
-          .hero-gif {
-            width: clamp(140px, 55vw, 200px);
-            height: clamp(140px, 55vw, 200px);
           }
         }
         .hero-stats-grid {
