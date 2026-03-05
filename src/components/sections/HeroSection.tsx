@@ -7,22 +7,44 @@ import { useTranslations } from '@/i18n/useTranslations';
 /* ─── Mockup iPhone animé ─────────────────────────────────────── */
 function IPhoneMockup() {
   const [fans, setFans] = useState(870);
+  const [displayFans, setDisplayFans] = useState(870);
+  const [displayRoyaltips, setDisplayRoyaltips] = useState(870 * 6);
   const [flash, setFlash] = useState<'fans' | 'royaltips' | null>(null);
   const [addedFans, setAddedFans] = useState(12);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const added = Math.floor(Math.random() * 4) + 1;
-      setFans(f => f + added);
+      const newFans = fans + added;
+      setFans(newFans);
       setAddedFans(added);
       setFlash('fans');
-      setTimeout(() => setFlash('royaltips'), 300);
-      setTimeout(() => setFlash(null), 900);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
-  const royaltips = fans * 6;
+      // Animation comptage fans
+      let startFans = fans;
+      const stepFans = setInterval(() => {
+        startFans += 1;
+        setDisplayFans(startFans);
+        if (startFans >= newFans) clearInterval(stepFans);
+      }, 80);
+
+      // Animation comptage royaltips avec délai
+      setTimeout(() => {
+        setFlash('royaltips');
+        let startRT = fans * 6;
+        const targetRT = newFans * 6;
+        const stepRT = setInterval(() => {
+          startRT += 6;
+          setDisplayRoyaltips(startRT);
+          if (startRT >= targetRT) { setDisplayRoyaltips(targetRT); clearInterval(stepRT); }
+        }, 80);
+      }, 300);
+
+      setTimeout(() => setFlash(null), 1200);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [fans]);
+
   const fmt = (n: number) => n.toLocaleString('fr-FR');
 
   return (
@@ -75,8 +97,8 @@ function IPhoneMockup() {
           {/* Stats grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
             {[
-              { id: 'fans', val: fmt(fans), label: 'FANS' },
-              { id: 'royaltips', val: fmt(royaltips) + '€', label: 'ROYALTIPS/MOIS' },
+              { id: 'fans', val: fmt(displayFans), label: 'FANS' },
+              { id: 'royaltips', val: fmt(displayRoyaltips) + '€', label: 'ROYALTIPS/MOIS' },
             ].map(({ id, val, label }) => (
               <div key={id} style={{
                 background: flash === id ? 'rgba(0,229,176,0.12)' : '#1a1a1a',
@@ -103,7 +125,7 @@ function IPhoneMockup() {
           }}>
             <div style={{ fontSize: '0.62rem', color: '#00e5b0', fontWeight: 600 }}>6€ par fan et par mois</div>
             <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.5)', marginTop: '2px', whiteSpace: 'nowrap' }}>
-              {fmt(fans)} × 6€ = <span style={{ color: '#00e5b0', fontWeight: 700 }}>{fmt(royaltips)}€</span>
+              {fmt(displayFans)} × 6€ = <span style={{ color: '#00e5b0', fontWeight: 700 }}>{fmt(displayRoyaltips)}€</span>
             </div>
           </div>
 
@@ -215,7 +237,7 @@ export default function HeroSection() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        paddingTop: 'clamp(80px, 12vh, 120px)',
+        paddingTop: 'clamp(70px, 10vh, 100px)',
         overflow: 'hidden',
         position: 'relative',
       }}
@@ -244,13 +266,17 @@ export default function HeroSection() {
       }} />
 
       <div className="container">
-        <div style={{ paddingBottom: 'clamp(40px, 6vh, 80px)' }}>
+        {/* Layout principal : 2 colonnes */}
+        <div className="hero-layout">
+
+          {/* Colonne gauche : kicker + titre + texte + boutons */}
+          <div className="hero-left">
 
           <div className="hero-kicker" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: 'clamp(20px, 3vh, 36px)',
+            marginBottom: 'clamp(16px, 2.5vh, 28px)',
             opacity: 0,
             flexWrap: 'wrap',
           }}>
@@ -268,11 +294,8 @@ export default function HeroSection() {
               {t('badge')}
             </span>
             <span style={{
-              height: '1px',
-              width: '40px',
-              background: 'var(--accent)',
-              opacity: 0.4,
-              display: 'block',
+              height: '1px', width: '40px',
+              background: 'var(--accent)', opacity: 0.4, display: 'block',
             }} />
             <div className="waveform">
               {[...Array(9)].map((_, i) => (
@@ -281,16 +304,12 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="hero-title-row" style={{ marginBottom: 0 }}>
-
           <h1
             ref={titleRef}
             style={{
-              maxWidth: 'min(860px, 100%)',
-              marginBottom: 'clamp(16px, 2.5vh, 28px)',
+              marginBottom: 'clamp(16px, 2.5vh, 24px)',
               perspective: '800px',
               fontFamily: 'var(--font-title)',
-              flex: '1 1 auto',
             }}
           >
             <span style={{ display: 'block' }}>
@@ -360,21 +379,13 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <div className="hero-mockup" style={{ opacity: 0 }}>
-            <IPhoneMockup />
-          </div>
-
-          </div>
-
           <p
             className="hero-sub"
             style={{
-              maxWidth: 'min(600px, 100%)',
               color: 'var(--text-secondary)',
-              fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)',
+              fontSize: 'clamp(0.95rem, 2vw, 1.05rem)',
               lineHeight: 1.7,
-              paddingTop: 'clamp(12px, 2vh, 20px)',
-              marginBottom: 'clamp(24px, 3.5vh, 40px)',
+              marginBottom: 'clamp(20px, 3vh, 32px)',
               opacity: 0,
               fontFamily: 'var(--font-body)',
             }}
@@ -401,7 +412,14 @@ export default function HeroSection() {
               {t('cta_secondary')}
             </a>
           </div>
-        </div>
+          </div>{/* fin hero-left */}
+
+          {/* Colonne droite : mockup iPhone */}
+          <div className="hero-mockup" style={{ opacity: 0 }}>
+            <IPhoneMockup />
+          </div>
+
+        </div>{/* fin hero-layout */}
 
         <div className="hero-stats-grid">
           {[
@@ -458,25 +476,37 @@ export default function HeroSection() {
       </div>
 
       <style>{`
-        .hero-title-row {
+        /* Layout 2 colonnes */
+        .hero-layout {
           display: flex;
-          align-items: center;
-          gap: clamp(24px, 4vw, 48px);
-          margin-bottom: clamp(16px, 2.5vh, 28px);
+          align-items: flex-start;
+          gap: clamp(32px, 5vw, 72px);
+          padding-bottom: clamp(32px, 5vh, 60px);
+        }
+        .hero-left {
+          flex: 1 1 auto;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
         }
         .hero-mockup {
           flex-shrink: 0;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
+          padding-top: 4px;
         }
-        @media (max-width: 640px) {
-          .hero-title-row {
-            flex-direction: column;
-            align-items: flex-start;
+        @media (max-width: 768px) {
+          .hero-layout {
+            flex-direction: column-reverse;
+            align-items: center;
+          }
+          .hero-left {
+            width: 100%;
           }
           .hero-mockup {
-            align-self: center;
+            padding-top: 0;
           }
         }
         .hero-stats-grid {
