@@ -3,12 +3,15 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef } from 'react';
 
+import { LOCALE_BCP47 } from '@/i18n/constants';
+import { useI18n } from '@/i18n/useI18n';
 import { useTranslations } from '@/i18n/useTranslations';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ComparisonSection() {
   const t = useTranslations('comparison');
+  const { locale } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
@@ -47,7 +50,7 @@ export default function ComparisonSection() {
           gsap.to(obj, {
             val: target, duration: 2, ease: 'power2.out',
             onUpdate: () => {
-              el.textContent = `${Math.round(obj.val).toLocaleString('fr-FR')}${isMillions ? ' M' : ''}`;
+              el.textContent = `${Math.round(obj.val).toLocaleString(LOCALE_BCP47[locale])}${isMillions ? ' M' : ''}`;
             }
           });
         }
@@ -91,30 +94,6 @@ export default function ComparisonSection() {
       hybrid: '~3 000 $/mois',
       artys: <span style={{ color: 'var(--accent)', fontWeight: 900, fontSize: '1.2rem', fontFamily: 'var(--font-title)' }}>6 000 $/mois</span>,
     },
-    {
-      metric: t('row5_metric'),
-      streaming: '—',
-      hybrid: '≈ 1 000 streams/fan/mois',
-      artys: '≈ 2 000 streams/fan/mois',
-    },
-    {
-      metric: t('row6_metric'),
-      streaming: <span style={{ color: 'var(--accent-red)' }}>❌ Algorithmique</span>,
-      hybrid: '✅ Mensuelle',
-      artys: '✅ Mensuelle garantie',
-    },
-    {
-      metric: t('row7_metric'),
-      streaming: <span style={{ color: 'var(--accent-red)' }}>Oui, totalement</span>,
-      hybrid: 'Partiellement',
-      artys: <span style={{ color: 'var(--accent)' }}>Non, jamais</span>,
-    },
-    {
-      metric: t('row8_metric'),
-      streaming: 'Indirecte',
-      hybrid: 'Directe',
-      artys: 'Directe + exclusive',
-    },
   ];
 
   return (
@@ -141,7 +120,7 @@ export default function ComparisonSection() {
           <table className="comparison-table">
             <thead>
               <tr>
-                <th style={{ width: '220px' }}>Métrique</th>
+                <th style={{ width: '220px' }}>{t('col_metric')}</th>
                 <th>{t('col_streaming')}</th>
                 <th>
                   {t('col_hybrid')}<br />

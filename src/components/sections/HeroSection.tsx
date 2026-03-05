@@ -1,8 +1,190 @@
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTranslations } from '@/i18n/useTranslations';
+
+/* ─── Mockup iPhone animé ─────────────────────────────────────── */
+function IPhoneMockup() {
+  const [fans, setFans] = useState(870);
+  const [displayFans, setDisplayFans] = useState(870);
+  const [displayRoyaltips, setDisplayRoyaltips] = useState(870 * 6);
+  const [flash, setFlash] = useState<'fans' | 'royaltips' | null>(null);
+  const [addedFans, setAddedFans] = useState(12);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const added = Math.floor(Math.random() * 4) + 1;
+      const newFans = fans + added;
+      setFans(newFans);
+      setAddedFans(added);
+      setFlash('fans');
+
+      // Animation comptage fans
+      let startFans = fans;
+      const stepFans = setInterval(() => {
+        startFans += 1;
+        setDisplayFans(startFans);
+        if (startFans >= newFans) clearInterval(stepFans);
+      }, 80);
+
+      // Animation comptage royaltips avec délai
+      setTimeout(() => {
+        setFlash('royaltips');
+        let startRT = fans * 6;
+        const targetRT = newFans * 6;
+        const stepRT = setInterval(() => {
+          startRT += 6;
+          setDisplayRoyaltips(startRT);
+          if (startRT >= targetRT) { setDisplayRoyaltips(targetRT); clearInterval(stepRT); }
+        }, 80);
+      }, 300);
+
+      setTimeout(() => setFlash(null), 1200);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [fans]);
+
+  const fmt = (n: number) => n.toLocaleString('fr-FR');
+
+  return (
+    <div style={{
+      width: 'clamp(220px, 28vw, 300px)',
+      height: 'clamp(448px, 57vw, 612px)',
+      background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+      borderRadius: '55px',
+      padding: '10px',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1), inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 60px rgba(0,229,176,0.08)',
+      position: 'relative',
+      flexShrink: 0,
+    }}>
+      {/* Notch */}
+      <div style={{
+        position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)',
+        width: '90px', height: '26px', background: '#000',
+        borderRadius: '0 0 18px 18px', zIndex: 10,
+      }} />
+
+      {/* Écran */}
+      <div style={{
+        width: '100%', height: '100%', background: '#000',
+        borderRadius: '46px', overflow: 'hidden', position: 'relative',
+      }}>
+        <div style={{
+          padding: 'clamp(28px, 4vw, 36px) clamp(14px, 2vw, 18px) 16px',
+          height: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        }}>
+
+          {/* Header artiste */}
+          <div style={{ textAlign: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{
+              width: '48px', height: '48px', borderRadius: '50%',
+              margin: '0 auto 0.4rem', overflow: 'hidden',
+              boxShadow: '0 0 20px rgba(0,229,176,0.4), 0 0 0 2px rgba(0,229,176,0.35)',
+              flexShrink: 0,
+            }}>
+              <img
+                src="https://i.imgur.com/LNd1qcF.png"
+                alt="Malcom"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
+            <div style={{
+              fontSize: '0.95rem', fontWeight: 800,
+              background: 'linear-gradient(135deg, #00e5b0, #00b890)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>Malcom</div>
+            <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.5)' }}>Artiste Artys</div>
+          </div>
+
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+            {[
+              { id: 'fans', val: fmt(displayFans), label: 'FANS' },
+              { id: 'royaltips', val: fmt(displayRoyaltips) + '€', label: 'ROYALTIPS/MOIS' },
+            ].map(({ id, val, label }) => (
+              <div key={id} style={{
+                background: flash === id ? 'rgba(0,229,176,0.12)' : '#1a1a1a',
+                borderRadius: '10px', padding: '0.55rem',
+                textAlign: 'center', position: 'relative', overflow: 'hidden',
+                border: `1px solid ${flash === id ? 'rgba(0,229,176,0.3)' : 'transparent'}`,
+                transition: 'background 0.3s, border-color 0.3s',
+              }}>
+                <div style={{
+                  fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', fontWeight: 900,
+                  color: '#00e5b0', fontFamily: 'monospace', whiteSpace: 'nowrap',
+                  transition: 'transform 0.2s',
+                  transform: flash === id ? 'scale(1.08)' : 'scale(1)',
+                }}>{val}</div>
+                <div style={{ fontSize: '0.52rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Calcul Royaltips */}
+          <div style={{
+            background: 'rgba(0,229,176,0.05)', border: '1px solid rgba(0,229,176,0.2)',
+            borderRadius: '8px', padding: '0.5rem', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '0.62rem', color: '#00e5b0', fontWeight: 600 }}>6€ par fan et par mois</div>
+            <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.5)', marginTop: '2px', whiteSpace: 'nowrap' }}>
+              {fmt(displayFans)} × 6€ = <span style={{ color: '#00e5b0', fontWeight: 700 }}>{fmt(displayRoyaltips)}€</span>
+            </div>
+          </div>
+
+          {/* Mini chart */}
+          <div style={{
+            height: '52px', background: 'linear-gradient(135deg, rgba(0,229,176,0.1), rgba(0,229,176,0.03))',
+            borderRadius: '8px', display: 'flex', alignItems: 'flex-end',
+            padding: '8px 10px 6px', gap: '3px',
+          }}>
+            {[40, 55, 45, 65, 58, 70, 62, 80, 75, 88].map((h, i) => (
+              <div key={i} style={{
+                flex: 1, background: i === 9 ? '#00e5b0' : `rgba(0,229,176,${0.2 + i * 0.06})`,
+                borderRadius: '3px 3px 0 0', height: `${h}%`,
+                transition: 'height 0.4s ease',
+              }} />
+            ))}
+          </div>
+
+          {/* Activité récente */}
+          <div style={{ background: '#1a1a1a', borderRadius: '10px', padding: '0.6rem' }}>
+            <div style={{ fontSize: '0.58rem', color: '#00e5b0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
+              Activité récente
+            </div>
+            {[
+              { icon: '➕', text: `+${addedFans} fans aujourd'hui` },
+              { icon: '💰', text: `+${fmt(addedFans * 6)}€ Royaltips` },
+              { icon: '🎵', text: '37 streams' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.58rem', color: 'rgba(255,255,255,0.65)', marginBottom: i < 2 ? '0.2rem' : 0 }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(0,229,176,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', flexShrink: 0 }}>
+                  {item.icon}
+                </div>
+                {item.text}
+              </div>
+            ))}
+          </div>
+
+          {/* CTA button */}
+          <button style={{
+            background: 'linear-gradient(135deg, #00e5b0, #00b890)',
+            color: '#000', border: 'none', borderRadius: '10px',
+            padding: '0.5rem', fontWeight: 700, fontSize: '0.62rem',
+            cursor: 'pointer', width: '100%', marginTop: 'auto',
+            boxShadow: '0 4px 16px rgba(0,229,176,0.3)',
+          }}>
+            Voir les analytics complets
+          </button>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function HeroSection() {
   const t = useTranslations('hero');
@@ -40,10 +222,41 @@ export default function HeroSection() {
       });
     }
 
-    gsap.fromTo('.hero-gif',
-      { opacity: 0, y: 30, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'power3.out', delay: 1.1 }
+    gsap.fromTo('.hero-mockup',
+      { opacity: 0, y: 30, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power3.out', delay: 1.1 }
     );
+
+    // Animation scroll-triggered sur les stat cards
+    gsap.fromTo('.hero-stat-item',
+      { opacity: 0, y: 50, scale: 0.96 },
+      {
+        opacity: 1, y: 0, scale: 1,
+        duration: 0.7,
+        stagger: 0.18,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.hero-stats-grid',
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    // Glow pulse sur les chiffres clés
+    gsap.to('.hero-stat-number', {
+      textShadow: '0 0 20px rgba(0,229,176,0.6)',
+      duration: 0.6,
+      delay: 0.4,
+      stagger: 0.18,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.hero-stats-grid',
+        start: 'top 88%',
+        toggleActions: 'play none none none',
+      }
+    });
+
   }, { scope: containerRef });
 
   const titleWords1 = t('title_1').split(' ');
@@ -60,7 +273,7 @@ export default function HeroSection() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        paddingTop: 'clamp(80px, 12vh, 120px)',
+        paddingTop: 'clamp(70px, 10vh, 100px)',
         overflow: 'hidden',
         position: 'relative',
       }}
@@ -89,13 +302,17 @@ export default function HeroSection() {
       }} />
 
       <div className="container">
-        <div style={{ paddingBottom: 'clamp(40px, 6vh, 80px)' }}>
+        {/* Layout principal : 2 colonnes */}
+        <div className="hero-layout">
+
+          {/* Colonne gauche : kicker + titre + texte + boutons */}
+          <div className="hero-left">
 
           <div className="hero-kicker" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: 'clamp(20px, 3vh, 36px)',
+            marginBottom: 'clamp(16px, 2.5vh, 28px)',
             opacity: 0,
             flexWrap: 'wrap',
           }}>
@@ -113,11 +330,8 @@ export default function HeroSection() {
               {t('badge')}
             </span>
             <span style={{
-              height: '1px',
-              width: '40px',
-              background: 'var(--accent)',
-              opacity: 0.4,
-              display: 'block',
+              height: '1px', width: '40px',
+              background: 'var(--accent)', opacity: 0.4, display: 'block',
             }} />
             <div className="waveform">
               {[...Array(9)].map((_, i) => (
@@ -126,16 +340,12 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="hero-title-row" style={{ marginBottom: 0 }}>
-
           <h1
             ref={titleRef}
             style={{
-              maxWidth: 'min(860px, 100%)',
-              marginBottom: 'clamp(16px, 2.5vh, 28px)',
+              marginBottom: 'clamp(16px, 2.5vh, 24px)',
               perspective: '800px',
               fontFamily: 'var(--font-title)',
-              flex: '1 1 auto',
             }}
           >
             <span style={{ display: 'block' }}>
@@ -205,25 +415,13 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <img
-            className="hero-gif"
-            src="/artys-anim.gif"
-            alt="Artys animation"
-            width={220}
-            height={220}
-          />
-
-          </div>
-
           <p
             className="hero-sub"
             style={{
-              maxWidth: 'min(600px, 100%)',
               color: 'var(--text-secondary)',
-              fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)',
+              fontSize: 'clamp(0.95rem, 2vw, 1.05rem)',
               lineHeight: 1.7,
-              paddingTop: 'clamp(12px, 2vh, 20px)',
-              marginBottom: 'clamp(24px, 3.5vh, 40px)',
+              marginBottom: 'clamp(20px, 3vh, 32px)',
               opacity: 0,
               fontFamily: 'var(--font-body)',
             }}
@@ -250,7 +448,14 @@ export default function HeroSection() {
               {t('cta_secondary')}
             </a>
           </div>
-        </div>
+          </div>{/* fin hero-left */}
+
+          {/* Colonne droite : mockup iPhone */}
+          <div className="hero-mockup" style={{ opacity: 0 }}>
+            <IPhoneMockup />
+          </div>
+
+        </div>{/* fin hero-layout */}
 
         <div className="hero-stats-grid">
           {[
@@ -265,16 +470,18 @@ export default function HeroSection() {
               body: t('stat2_body'),
             },
           ].map((stat, i) => (
-            <div key={i} className="hero-stat-item">
-              <div style={{
-                fontFamily: 'var(--font-title)',
-                fontWeight: 900,
-                fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                letterSpacing: '-0.03em',
-                color: 'var(--accent)',
-                lineHeight: 1.1,
-                marginBottom: '6px',
-              }}>
+            <div key={i} className="hero-stat-item" style={{ opacity: 0 }}>
+              <div
+                className="hero-stat-number"
+                style={{
+                  fontFamily: 'var(--font-title)',
+                  fontWeight: 900,
+                  fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+                  letterSpacing: '-0.03em',
+                  color: 'var(--accent)',
+                  lineHeight: 1.1,
+                  marginBottom: '6px',
+                }}>
                 {stat.number}
               </div>
               <div style={{
@@ -307,34 +514,37 @@ export default function HeroSection() {
       </div>
 
       <style>{`
-        .hero-title-row {
+        /* Layout 2 colonnes */
+        .hero-layout {
           display: flex;
           align-items: center;
-          gap: clamp(24px, 4vw, 48px);
-          margin-bottom: clamp(16px, 2.5vh, 28px);
+          gap: clamp(32px, 5vw, 72px);
+          padding-bottom: clamp(32px, 5vh, 60px);
         }
-        .hero-gif {
+        .hero-left {
+          flex: 1 1 auto;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding-top: clamp(0px, 3vh, 24px);
+        }
+        .hero-mockup {
           flex-shrink: 0;
-          width: clamp(300px, 36vw, 520px);
-          height: clamp(300px, 36vw, 520px);
-          object-fit: contain;
-          opacity: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        @media (max-width: 640px) {
-          .hero-title-row {
-            flex-direction: column;
-            align-items: flex-start;
+        @media (max-width: 768px) {
+          .hero-layout {
+            flex-direction: column-reverse;
+            align-items: center;
           }
-          .hero-gif {
-            width: clamp(180px, 65vw, 320px);
-            height: clamp(180px, 65vw, 320px);
-            align-self: center;
+          .hero-left {
+            width: 100%;
           }
-        }
-        @media (max-width: 360px) {
-          .hero-gif {
-            width: clamp(140px, 55vw, 200px);
-            height: clamp(140px, 55vw, 200px);
+          .hero-mockup {
+            padding-top: 0;
           }
         }
         .hero-stats-grid {
@@ -351,10 +561,19 @@ export default function HeroSection() {
           background: var(--surface);
           border: 1px solid var(--border);
           border-radius: 16px;
-          transition: border-color 0.25s;
+          transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+          cursor: default;
         }
         .hero-stat-item:hover {
-          border-color: rgba(0,229,176,0.25);
+          border-color: rgba(0,229,176,0.4);
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(0,229,176,0.1);
+        }
+        .hero-stat-item:hover .hero-stat-number {
+          text-shadow: 0 0 24px rgba(0,229,176,0.5);
+        }
+        .hero-stat-number {
+          transition: text-shadow 0.3s;
         }
         @media (max-width: 480px) {
           .hero-stats-grid {
