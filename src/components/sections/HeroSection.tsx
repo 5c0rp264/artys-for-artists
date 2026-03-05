@@ -479,7 +479,7 @@ export default function HeroSection() {
         /* Layout 2 colonnes */
         .hero-layout {
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           gap: clamp(32px, 5vw, 72px);
           padding-bottom: clamp(32px, 5vh, 60px);
         }
@@ -489,13 +489,13 @@ export default function HeroSection() {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          padding-top: clamp(0px, 3vh, 24px);
         }
         .hero-mockup {
           flex-shrink: 0;
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: center;
-          padding-top: 4px;
         }
         @media (max-width: 768px) {
           .hero-layout {
