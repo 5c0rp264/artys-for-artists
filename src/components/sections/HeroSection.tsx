@@ -488,7 +488,7 @@ export default function HeroSection() {
           min-width: 0;
           display: flex;
           flex-direction: column;
-          justify-content: flex-start;
+          justify-content: center;
         }
         .hero-mockup {
           flex-shrink: 0;
