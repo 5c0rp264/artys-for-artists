@@ -84,7 +84,11 @@ export default function ProblemSection() {
                 letterSpacing: '0.02em',
                 textTransform: 'uppercase',
               }}>
-                {t('ia_title')}
+                {/* Titre coloré : L'IA (blanc) aggrave (orange) tout en (blanc) 2026 (orange) */}
+                <span style={{ color: '#fff' }}>L'IA </span>
+                <span style={{ color: 'var(--accent-red)' }}>aggrave </span>
+                <span style={{ color: '#fff' }}>tout en </span>
+                <span style={{ color: 'var(--accent-red)' }}>2026</span>
               </div>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {[t('ia_1'), t('ia_2'), t('ia_3'), t('ia_4')].map((item, i) => (
