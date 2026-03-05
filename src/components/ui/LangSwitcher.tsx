@@ -18,13 +18,12 @@ export default function LangSwitcher() {
           onClick={() => setLocale(code)}
           className={`
             px-2 py-1 rounded text-xs font-bold tracking-widest uppercase transition-all duration-200
-            font-[var(--font-jost)]
             ${locale === code
               ? 'text-[var(--accent)] bg-[rgba(0,229,176,0.1)]'
               : 'text-[var(--text-secondary)] hover:text-[var(--text)]'
             }
           `}
-          style={{ fontFamily: 'var(--font-title)', border: 'none', background: locale === code ? 'rgba(0,229,176,0.1)' : 'none', cursor: 'pointer' }}
+          style={{ fontFamily: 'var(--font-title)', border: 'none', cursor: 'pointer' }}
         >
           {LOCALE_LABELS[code]}
         </button>

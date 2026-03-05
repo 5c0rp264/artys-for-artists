@@ -3,12 +3,15 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef } from 'react';
 
+import { LOCALE_BCP47 } from '@/i18n/constants';
+import { useI18n } from '@/i18n/useI18n';
 import { useTranslations } from '@/i18n/useTranslations';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ComparisonSection() {
   const t = useTranslations('comparison');
+  const { locale } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
@@ -47,7 +50,7 @@ export default function ComparisonSection() {
           gsap.to(obj, {
             val: target, duration: 2, ease: 'power2.out',
             onUpdate: () => {
-              el.textContent = `${Math.round(obj.val).toLocaleString('fr-FR')}${isMillions ? ' M' : ''}`;
+              el.textContent = `${Math.round(obj.val).toLocaleString(LOCALE_BCP47[locale])}${isMillions ? ' M' : ''}`;
             }
           });
         }
@@ -117,7 +120,7 @@ export default function ComparisonSection() {
           <table className="comparison-table">
             <thead>
               <tr>
-                <th style={{ width: '220px' }}>Métrique</th>
+                <th style={{ width: '220px' }}>{t('col_metric')}</th>
                 <th>{t('col_streaming')}</th>
                 <th>
                   {t('col_hybrid')}<br />
